@@ -1,0 +1,9 @@
+quack104
+eficicacia10
+soussanval51
+n0hatte8o
+
+Primeira linha = senha cozinha
+Segunda linha = senha gerencia
+Terceira linha = senha administracao
+Quarta linha = senha garconete 
