@@ -10,7 +10,6 @@
 typedef struct {
     char nome[50];
     int quantidade;
-    float precoCompra;
 } IngredienteEstoque;
 
 typedef struct NoIngred {
@@ -23,14 +22,14 @@ typedef struct NoIngred {
 
 void inicializaEstoque(IngredienteEstoque estoque[], int *n) {
     *n = 8;
-    strcpy(estoque[0].nome, "Pao");     estoque[0].quantidade = 50; estoque[0].precoCompra = 0.50f;
-    strcpy(estoque[1].nome, "Carne");   estoque[1].quantidade = 40; estoque[1].precoCompra = 2.00f;
-    strcpy(estoque[2].nome, "Bacon");   estoque[2].quantidade = 30; estoque[2].precoCompra = 1.00f;
-    strcpy(estoque[3].nome, "Queijo");  estoque[3].quantidade = 40; estoque[3].precoCompra = 0.80f;
-    strcpy(estoque[4].nome, "Alface");  estoque[4].quantidade = 60; estoque[4].precoCompra = 0.30f;
-    strcpy(estoque[5].nome, "Tomate");  estoque[5].quantidade = 50; estoque[5].precoCompra = 0.40f;
-    strcpy(estoque[6].nome, "Molho");   estoque[6].quantidade = 40; estoque[6].precoCompra = 0.25f;
-    strcpy(estoque[7].nome, "Cebola");  estoque[7].quantidade = 30; estoque[7].precoCompra = 0.20f;
+    strcpy(estoque[0].nome, "Pao");     estoque[0].quantidade = 50; estoque[0].;
+    strcpy(estoque[1].nome, "Carne");   estoque[1].quantidade = 40; estoque[1].;
+    strcpy(estoque[2].nome, "Bacon");   estoque[2].quantidade = 30; estoque[2].;
+    strcpy(estoque[3].nome, "Queijo");  estoque[3].quantidade = 40; estoque[3].;
+    strcpy(estoque[4].nome, "Alface");  estoque[4].quantidade = 60; estoque[4].;
+    strcpy(estoque[5].nome, "Tomate");  estoque[5].quantidade = 50; estoque[5].;
+    strcpy(estoque[6].nome, "Molho");   estoque[6].quantidade = 40; estoque[6].;
+    strcpy(estoque[7].nome, "Cebola");  estoque[7].quantidade = 30; estoque[7].;
 }
 
 int buscaIngredienteIndex(IngredienteEstoque estoque[], int n, const char *nome) {
@@ -156,3 +155,4 @@ void atendimento_por_dias(hamburguer cardapio[], struct Fila *fila, IngredienteE
     imprimirInOrderConsumidos(raiz_consumo);
     liberarArvore(raiz_consumo);
 }
+
