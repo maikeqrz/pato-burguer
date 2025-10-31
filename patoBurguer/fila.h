@@ -44,7 +44,7 @@ struct Pedido* desenfileirar(struct Fila* f) {
     return removido;
 }
 
-int mostrarFila(struct Fila* f) {
+void mostrarFila(struct Fila* f) {
     struct Pedido* aux = f->inicio;
     while (aux != NULL) {
         printf("Pedido %d (Hamburguer %d)\n", aux->id, aux->idHamburguer);

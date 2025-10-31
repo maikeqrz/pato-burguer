@@ -7,12 +7,12 @@
 
 // Tipo de item da pilha
 typedef int 
-    tp_itemm;
+    tp_item_pilha;
 
 // Estrutura da pilha
 typedef struct {
     int topo;
-    tp_item item[MAX];
+    tp_item_pilha item[MAX];
 } tp_pilha;
 
 // Inicializa a pilha
@@ -31,7 +31,7 @@ int pilhaCheia(tp_pilha *p) {
 }
 
 // Empilha um elemento
-int push(tp_pilha *p, tp_item e) {
+int push(tp_pilha *p, tp_item_pilha e) {
     if (pilhaCheia(p)) {
         return 0;  // Falha ao empilhar (pilha cheia)
     }
@@ -41,7 +41,7 @@ int push(tp_pilha *p, tp_item e) {
 }
 
 // Desempilha um elemento
-int pop(tp_pilha *p, tp_item *e) {
+int pop(tp_pilha *p, tp_item_pilha *e) {
     if (pilhaVazia(p)) {
         return 0;  // Falha ao desempilhar (pilha vazia)
     }
@@ -55,7 +55,7 @@ int alturaPilha(tp_pilha *p) {
 }
 
 void imprimePilha(tp_pilha p) {
-    tp_item e;
+    tp_item_pilha e;
     printf("\n");
     while (!pilhaVazia(&p)) {
         pop(&p, &e);
