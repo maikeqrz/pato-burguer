@@ -6,8 +6,7 @@
 #define MAX 100
 
 // Tipo de item da pilha
-typedef int 
-    tp_item_pilha;
+typedef char* tp_item_pilha;
 
 // Estrutura da pilha
 typedef struct {
@@ -51,7 +50,7 @@ int pop(tp_pilha *p, tp_item_pilha *e) {
 }
 
 int alturaPilha(tp_pilha *p) {
-    return p->topo+1;
+    return p->topo + 1;
 }
 
 void imprimePilha(tp_pilha p) {
@@ -59,7 +58,7 @@ void imprimePilha(tp_pilha p) {
     printf("\n");
     while (!pilhaVazia(&p)) {
         pop(&p, &e);
-        printf("%d", e);
+        printf("%s\n", e);
     }
 }
 
