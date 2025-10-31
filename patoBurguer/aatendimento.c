@@ -5,11 +5,7 @@
 #include <time.h>
 #include "cardapio.h"
 #include "fila.h"
-
-typedef struct {
-    char nome[50];
-    int quantidade;
-} IngredienteEstoque;
+#include "ingredientes.h" 
 
 
 typedef struct NoIngred {
@@ -18,7 +14,6 @@ typedef struct NoIngred {
     struct NoIngred *prox;
 } NoIngred;
 
-
 NoIngred* criaNo(const char *nome, int qtd) {
     NoIngred* novo = (NoIngred*) malloc(sizeof(NoIngred));
     strcpy(novo->nome, nome);
@@ -26,7 +21,6 @@ NoIngred* criaNo(const char *nome, int qtd) {
     novo->prox = NULL;
     return novo;
 }
-
 
 void inserirConsumido(NoIngred **lista, const char *nome, int qtd) {
     NoIngred *atual = *lista;
@@ -49,7 +43,6 @@ void inserirConsumido(NoIngred **lista, const char *nome, int qtd) {
     }
 }
 
-
 void imprimirConsumidos(NoIngred *lista) {
     NoIngred *atual = lista;
     while (atual != NULL) {
@@ -68,73 +61,63 @@ void liberarLista(NoIngred *lista) {
 }
 
 
-void inicializaEstoque(IngredienteEstoque estoque[], int *n) {
-    *n = 8;
-    strcpy(estoque[0].nome, "Pao");     estoque[0].quantidade = 50;
-    strcpy(estoque[1].nome, "Carne");   estoque[1].quantidade = 40;
-    strcpy(estoque[2].nome, "Bacon");   estoque[2].quantidade = 30;
-    strcpy(estoque[3].nome, "Queijo");  estoque[3].quantidade = 40;
-    strcpy(estoque[4].nome, "Alface");  estoque[4].quantidade = 60;
-    strcpy(estoque[5].nome, "Tomate");  estoque[5].quantidade = 50;
-    strcpy(estoque[6].nome, "Molho");   estoque[6].quantidade = 40;
-    strcpy(estoque[7].nome, "Cebola");  estoque[7].quantidade = 30;
-}
 
-int buscaIngredienteIndex(IngredienteEstoque estoque[], int n, const char *nome) {
-    for (int i = 0; i < n; i++) {
-        if (strcasecmp(estoque[i].nome, nome) == 0)
+int buscaIngredienteIndex(const char *nome) {
+    for (int i = 0; i < numIngredientes; i++) {
+        if (strcasecmp(ingredientes[i].nome, nome) == 0)
             return i;
     }
     return -1;
 }
 
-int consumirIngrediente(IngredienteEstoque estoque[], int n, const char *nome, int qtd) {
-    int idx = buscaIngredienteIndex(estoque, n, nome);
+int consumirIngrediente(const char *nome, int qtd) {
+    int idx = buscaIngredienteIndex(nome);
     if (idx == -1) return 0;
-    if (estoque[idx].quantidade < qtd) return 0;
-    estoque[idx].quantidade -= qtd;
+    if (ingredientes[idx].quantidade < qtd) return 0;
+    ingredientes[idx].quantidade -= qtd;
     return 1;
 }
 
 
+
 void atendimento_cliente(hamburguer *h) {
-    printf("\nOii, tudo bem? Eu desejo um %s!\n", h->nome);
+    printf("\noii, tudo bem? Eu desejo um %s!\n", h->nome);
 }
 
-void montar_hamburguer_manual(hamburguer *h, IngredienteEstoque estoque[], int n, NoIngred **lista_consumo) {
+void montar_hamburguer_manual(hamburguer *h, NoIngred **lista_consumo) {
     atendimento_cliente(h);
 
     printf("\n-- Montando: %s --\n", h->nome);
-    printf("Siga a ordem exata dos ingredientes.\n\n");
+    printf("siga a ordem exata dos ingredientes.\n\n");
 
-    printf("Receita (%d itens):\n", h->qntIngredientes);
+    printf("receita (%d itens):\n", h->qntIngredientes);
     for (int i = 0; i < h->qntIngredientes; i++) {
         printf(" %d) %s\n", i + 1, h->ingredientes[i]);
     }
 
     for (int i = 0; i < h->qntIngredientes; i++) {
         char entrada[64];
-        printf("\nIngrediente %d: ", i + 1);
+        printf("\ningrediente %d: ", i + 1);
         scanf(" %63[^\n]", entrada);
 
         if (strcasecmp(entrada, h->ingredientes[i]) != 0) {
-            printf("-> Errado! Esperado: %s\n", h->ingredientes[i]);
+            printf("-> errado! esperado: %s\n", h->ingredientes[i]);
         }
 
-        if (!consumirIngrediente(estoque, n, h->ingredientes[i], 1)) {
-            printf("-> Falta %s no estoque! Pedido cancelado.\n", h->ingredientes[i]);
+        if (!consumirIngrediente(h->ingredientes[i], 1)) {
+            printf("-> falta %s no estoque! pedido cancelado.\n", h->ingredientes[i]);
             return;
         }
 
         inserirConsumido(lista_consumo, h->ingredientes[i], 1);
     }
 
-    printf("\nMontagem concluída!\n");
+    printf("\nmontagem concluída!\n");
 }
 
+ 
 
-
-void atendimento_por_dias(hamburguer cardapio[], struct Fila *fila, IngredienteEstoque estoque[], int nEstoque, int dias) {
+void atendimento_por_dias(hamburguer cardapio[], struct Fila *fila, int dias) {
     NoIngred *lista_consumo = NULL;
     srand(time(NULL));
 
@@ -155,11 +138,11 @@ void atendimento_por_dias(hamburguer cardapio[], struct Fila *fila, IngredienteE
                 continue;
             }
 
-            montar_hamburguer_manual(&cardapio[idx], estoque, nEstoque, &lista_consumo);
+            montar_hamburguer_manual(&cardapio[idx], &lista_consumo);
             free(p);
         }
 
-        printf("\nDia %d encerrado. Pressione ENTER para continuar...\n", dia);
+        printf("\ndia %d encerrado. pressione ENTER para continuar...\n", dia);
         getchar();
     }
 
