@@ -2,11 +2,12 @@
 #define PILHA_H
 
 #include <stdio.h>
+#include "cardapio.h"
 
 #define MAX 100
 
 // Tipo de item da pilha
-typedef char* tp_item_pilha;
+typedef ingrediente* tp_item_pilha;
 
 // Estrutura da pilha
 typedef struct {
