@@ -5,5 +5,5 @@ n0hatte8o
 
 Primeira linha = senha cozinha
 Segunda linha = senha gerencia
-Terceira linha = senha administracao
-Quarta linha = senha garconete 
+Terceira linha = senha adminstracap
+Quarta linha = senha garconete
