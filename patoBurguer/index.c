@@ -390,64 +390,67 @@ int conta_estoque(tp_listad *lista, ingrediente item) {
 }
 
 void ADM_comprar(tipomatrix *matrix, tp_listad *lista, int *dinheiro, FILE *data2) {
-    int pagina = 0;
-    int sair_compra = 0;
-    char escolha[10];
-    char msg_erro[100] = "";
+    int pagina = 0;              // controla a página de itens (0 ou 1)
+    int sair_compra = 0;         // flag para sair do menu
+    char escolha[10];            // guarda a entrada do usuário
+    char msg_erro[100] = "";     // mensagens de erro ou confirmação
 
     while (!sair_compra) {
+        // limpa a tela e desenha o fundo
         printf(resetar);
         printf(apagar);
         cursor(0, 0);
         preencher(matrix, backozinha);
+
         escreverCentro(matrix, forozinha, 2, "--- COMPRAR INGREDIENTES ---", backozinha);
+
+        // Mostra o saldo atual do jogador
         char dindin_str[50];
         sprintf(dindin_str, "Patocoins: %d", *dinheiro);
         escreverCentro(matrix, forcoelba, 4, dindin_str, backozinha);
 
+        // Exibe de 8 em 8 ingredientes (paginação)
         int start = pagina * 8; 
         int end = (pagina == 0) ? 8 : 15;
         int linha_item = 6;
 
         for (int i = start; i < end; i++) {
+            // Exibe o ID, nome e preço de cada ingrediente do estoque global
             char item_str[100];
             sprintf(item_str, "%d. %-20s - Preco: R$ %.2f", i, estoque[i].nome, estoque[i].preco);
             escreverCentro(matrix, forcoelba, linha_item, item_str, backozinha);
             linha_item++;
         }
 
+        // Opções para o jogador
         escreverCentro(matrix, forcoelba, 20, "Digite ID (comprar), 'p' (prox), 'a' (ant), 's' (sair)", backozinha);
         escreverCentro(matrix, forcoelba, 22, "Digite aqui:              ", backozinha);
         
+        // Exibe mensagem de erro se existir
         if (strlen(msg_erro) > 0) {
             escreverCentro(matrix, AVISO, 25, msg_erro, backozinha);
             strcpy(msg_erro, ""); 
         }
-        
-        showtime(*matrix);
+
+        showtime(*matrix); // mostra a interface atualizada
         inputinhoTXT(matrix, 22, 49, forpedro, escolha);
 
-        for(int i = 0; escolha[i]; i++){
-            escolha[i] = tolower(escolha[i]);
-        }
+        // Converte tudo para minúsculo para evitar erro de digitação
+        for(int i = 0; escolha[i]; i++) escolha[i] = tolower(escolha[i]);
 
-        if (strcmp(escolha, "s") == 0) {
-            sair_compra = 1;
-            continue;
-        } else if (strcmp(escolha, "p") == 0) {
-            pagina = 1;
-            continue;
-        } else if (strcmp(escolha, "a") == 0) {
-            pagina = 0;
-            continue;
-        }
+        // --- Comandos de navegação ---
+        if (strcmp(escolha, "s") == 0) { sair_compra = 1; continue; }
+        else if (strcmp(escolha, "p") == 0) { pagina = 1; continue; }
+        else if (strcmp(escolha, "a") == 0) { pagina = 0; continue; }
 
+        // Converte o ID digitado em número
         int id = atoi(escolha);
         if (id < 0 || id > 14 || (id == 0 && strcmp(escolha, "0") != 0)) {
             sprintf(msg_erro, "ID '%s' invalido. Tente novamente.", escolha);
             continue;
         }
 
+        // Pede a quantidade desejada
         escreverCentro(matrix, forcoelba, 22, "Quantidade:               ", backozinha);
         showtime(*matrix);
         char qtd_str[10];
@@ -459,17 +462,23 @@ void ADM_comprar(tipomatrix *matrix, tp_listad *lista, int *dinheiro, FILE *data
             continue;
         }
 
+        // Calcula o custo total da compra
         float custo = estoque[id].preco * qtd;
         if (*dinheiro < custo) {
             sprintf(msg_erro, "Dinheiro insuficiente! Custo: %.2f", custo);
             continue;
         }
 
+        // --- ALOCAÇÃO DINÂMICA AQUI ---
+        // Cada ingrediente comprado é adicionado dinamicamente à lista.
+        // Isso significa que a função insere_listad_no_fim() faz malloc()
+        // e adiciona um novo nó no final da lista encadeada.
         *dinheiro -= (int)custo; 
         for (int i = 0; i < qtd; i++) {
-            insere_listad_no_fim(lista, estoque[id]); 
+            insere_listad_no_fim(lista, estoque[id]);  // aloca e adiciona
         }
 
+        // Atualiza o arquivo de log com o novo estoque e dinheiro
         rewind(data2);
         imprime_listad2salva(lista, data2, *dinheiro);
         fflush(data2);
@@ -483,14 +492,17 @@ void ADM_vender(tipomatrix *matrix, tp_listad *lista, int *dinheiro, FILE *data2
     int sair_venda = 0;
     char escolha[10];
     char msg_erro[100] = "";
-    float multiplicador_venda = 0.5;
+    float multiplicador_venda = 0.5; // vende pela metade do preço original
 
     while (!sair_venda) {
         printf(resetar);
         printf(apagar);
         cursor(0, 0);
         preencher(matrix, backozinha);
+
         escreverCentro(matrix, forozinha, 2, "--- VENDER INGREDIENTES ---", backozinha);
+
+        // Mostra o saldo atual antes de vender
         char dindin_str[50];
         sprintf(dindin_str, "Patocoins: %d", *dinheiro);
         escreverCentro(matrix, forcoelba, 4, dindin_str, backozinha);
@@ -499,11 +511,13 @@ void ADM_vender(tipomatrix *matrix, tp_listad *lista, int *dinheiro, FILE *data2
         int end = (pagina == 0) ? 8 : 15;
         int linha_item = 6;
 
+        // Mostra ingredientes e a quantidade atual de cada um
         for (int i = start; i < end; i++) {
             char item_str[100];
             int qtd_atual = conta_estoque(lista, estoque[i]);
             float preco_venda = estoque[i].preco * multiplicador_venda;
-            sprintf(item_str, "%d. %-20s (Qtd: %d) - Vende por: R$ %.2f", i, estoque[i].nome, qtd_atual, preco_venda);
+            sprintf(item_str, "%d. %-20s (Qtd: %d) - Vende por: R$ %.2f",
+                    i, estoque[i].nome, qtd_atual, preco_venda);
             escreverCentro(matrix, forcoelba, linha_item, item_str, backozinha);
             linha_item++;
         }
@@ -515,24 +529,16 @@ void ADM_vender(tipomatrix *matrix, tp_listad *lista, int *dinheiro, FILE *data2
             escreverCentro(matrix, AVISO, 25, msg_erro, backozinha);
             strcpy(msg_erro, "");
         }
-        
+
         showtime(*matrix);
         inputinhoTXT(matrix, 22, 49, forpedro, escolha);
 
-        for(int i = 0; escolha[i]; i++){
-            escolha[i] = tolower(escolha[i]);
-        }
+        for(int i = 0; escolha[i]; i++) escolha[i] = tolower(escolha[i]);
 
-        if (strcmp(escolha, "s") == 0) {
-            sair_venda = 1;
-            continue;
-        } else if (strcmp(escolha, "p") == 0) {
-            pagina = 1;
-            continue;
-        } else if (strcmp(escolha, "a") == 0) {
-            pagina = 0;
-            continue;
-        }
+        // Navegação
+        if (strcmp(escolha, "s") == 0) { sair_venda = 1; continue; }
+        else if (strcmp(escolha, "p") == 0) { pagina = 1; continue; }
+        else if (strcmp(escolha, "a") == 0) { pagina = 0; continue; }
 
         int id = atoi(escolha);
         if (id < 0 || id > 14 || (id == 0 && strcmp(escolha, "0") != 0)) {
@@ -540,6 +546,7 @@ void ADM_vender(tipomatrix *matrix, tp_listad *lista, int *dinheiro, FILE *data2
             continue;
         }
 
+        // Pergunta a quantidade que deseja vender
         escreverCentro(matrix, forcoelba, 22, "Quantidade:               ", backozinha);
         showtime(*matrix);
         char qtd_str[10];
@@ -551,18 +558,23 @@ void ADM_vender(tipomatrix *matrix, tp_listad *lista, int *dinheiro, FILE *data2
             continue;
         }
 
+        // Verifica se o jogador tem o suficiente no estoque
         int qtd_estoque = conta_estoque(lista, estoque[id]);
         if (qtd > qtd_estoque) {
             sprintf(msg_erro, "Estoque insuficiente! Você so tem %d.", qtd_estoque);
             continue;
         }
 
+        // --- ALOCAÇÃO DINÂMICA REVERSA ---
+        // Aqui é feita a remoção de nós da lista encadeada.
+        // Cada chamada de remove_listad() dá free() em um nó da lista.
         int lucro = (int)(estoque[id].preco * multiplicador_venda * qtd);
         *dinheiro += lucro;
         for (int i = 0; i < qtd; i++) {
-            remove_listad(lista, estoque[id]); 
+            remove_listad(lista, estoque[id]);  // libera o nó da lista
         }
 
+        // Atualiza o arquivo com as novas informações
         rewind(data2);
         imprime_listad2salva(lista, data2, *dinheiro);
         fflush(data2);
@@ -590,6 +602,7 @@ void ADM_ver_estoque(tipomatrix *matrix, tp_listad *lista, int *dinheiro) {
         linha_atual++;
     }
     
+    // Espera ENTER pra voltar
     pausar(matrix, backozinha);
 }
 
