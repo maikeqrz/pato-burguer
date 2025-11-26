@@ -766,8 +766,7 @@ int main()
     escreverCentro(&comeco, forcoelba, 10, "Hoje estarei te auxiliando nesta filial.", backode);
     escreverCentro(&comeco, forcoelba, 12, "Por favor, informe sua categoria de ingresso: ", backode); 
     escreverCentro(&comeco, forcoelba, 14, "--> cliente <--", backode);
-    escreverCentro(&comeco, forcoelba, 15, "--> cozinheiro <--", backode);
-    escreverCentro(&comeco, forcoelba, 16, "--> garcom <--", backode);
+    escreverCentro(&comeco, forcoelba, 15, "--> cozinha <--", backode);
     escreverCentro(&comeco, forcoelba, 17, "EM MANUTENCAO --> caixa <-- EM MANUTENCAO", backode);
     escreverCentro(&comeco, forcoelba, 18, "--> admin <--", backode);
     escreverCentro(&comeco, forcoelba, 21, "Digite aqui:              ", backode);
@@ -792,18 +791,19 @@ int main()
             CLIENTE(&comeco, cardapio);
             socorro = 1;
         }
-        else if (strcmp(categoria, "cozinheiro") == 0)
-        {
-            int a = 0;
-            int a1 = 0;
-            COZINHEIRO(&comeco, cardapio, &PILHA, data2, &dinheiro, armazen);
-            socorro = 1;
-        }
-        else if (strcmp(categoria, "garcom") == 0)
-        {
-            GARCOM(&comeco, cardapio, &fila);
-            socorro = 1;
-        }
+        else if (strcmp(categoria, "cozinha") == 0)
+{
+    // PRIMEIRO O GARÇOM RECEBE OS PEDIDOS
+    GARCOM(&comeco, cardapio, &fila);
+
+    // DEPOIS O COZINHEIRO PREPARA OS PEDIDOS
+    COZINHEIRO(&comeco, cardapio, &PILHA, data2, &dinheiro, armazen);
+
+    socorro = 1;
+}
+
+
+
         else if (strcmp(categoria, "caixa") == 0)
         {
             GERENTE(&comeco);
