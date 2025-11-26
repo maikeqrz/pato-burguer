@@ -236,7 +236,7 @@ void COZINHEIRO(tipomatrix *matrix, hamburguer cardapio[10], tp_pilha *pilhaa, F
             // MOSTRAR A PILHA CRESCENDO
             if (!pilhaVazia(pilhaa)) {      /*empilhamento*/
                 int linha = 15;
-                int topo = alturaPilha(pilhaa) - 1;
+                int topo = alturaPilha(pilhaa) - 1; /*kk*/
 
                 for (int k = topo; k >= 0; k--) {
                     escreverCentro(matrix, forcoelba, linha, pilhaa->item[k]->nome, backardapio);
