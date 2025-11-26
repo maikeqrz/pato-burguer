@@ -791,165 +791,21 @@ int main()
         {
             int a = 0;
             int a1 = 0;
-            while (a == 0)
-            {
-                printf(resetar);
-                printf(apagar);
-                cursor(0, 0);
-                preencher(&comeco, backardapio);
-                escreverCentro(&comeco, forardapio, 3, "CLUBE DE PROGRAMACAO", backardapio);
-                escreverCentro(&comeco, forcoelba, 7, "O expediente inicia agora.", backardapio);
-                escreverCentro(&comeco, forcoelba, 15, "Por favor, informe sua senha: ", backardapio);
-                escreverCentro(&comeco, forcoelba, 19, "Digite aqui:              ", backardapio);
-                if (a1 == 1){
-                    escreverCentro(&comeco, AVISO, 25, "Senha Incorreta!", backardapio);
-                }
-                showtime(comeco);
-                char senha[12];
-                inputinhoTXT(&comeco, 19, 49, forpedro, senha);
-                rewind(data);
-
-                char validacao[14];
-
-                fgets(validacao, 14, data);
-                validacao[strcspn(validacao, "\r\n")] = '\0';
-                consertaEspaco(validacao);
-
-                if (strcmp(validacao, senha) == 0){
-                    a = 1;
-                }
-                else{
-                    a1 = 1;
-                }
-            }
             COZINHEIRO(&comeco, cardapio, &PILHA, data2, &dinheiro, armazen);
             socorro = 1;
         }
         else if (strcmp(categoria, "garcom") == 0)
         {
-            int a = 0;
-            int a1 = 0;
-            while (a == 0)
-            {
-                printf(resetar);
-                printf(apagar);
-                cursor(0, 0);
-                preencher(&comeco, backardapio);
-                escreverCentro(&comeco, forardapio, 3, "CLUBE DE PROGRAMACAO", backardapio);
-                escreverCentro(&comeco, forcoelba, 7, "anote os pedidos UwU", backardapio);
-                escreverCentro(&comeco, forcoelba, 15, "Por favor, informe sua senha: ", backardapio);
-                escreverCentro(&comeco, forcoelba, 19, "Digite aqui:              ", backardapio);
-                if (a1 == 1){
-                    escreverCentro(&comeco, AVISO, 25, "Senha Incorreta!", backardapio);
-                }
-                showtime(comeco);
-                char senha[12];
-                inputinhoTXT(&comeco, 19, 49, forpedro, senha);
-                rewind(data);
-
-                char lixo1[14];
-                char lixo2[14];
-                char lixo3[14];
-                char validacao[14];
-
-                fgets(lixo1, 14, data);
-                fgets(lixo2, 14, data);
-                fgets(lixo3, 14, data);
-                fgets(validacao, 14, data);
-                validacao[strcspn(validacao, "\r\n")] = '\0';
-                consertaEspaco(validacao);
-
-                if (strcmp(validacao, senha) == 0){
-                    a = 1;
-                }
-                else{
-                    a1 = 1;
-                }
-            }
             GARCOM(&comeco, cardapio, &fila);
             socorro = 1;
         }
         else if (strcmp(categoria, "caixa") == 0)
         {
-            int a = 0;
-            int a1 = 0;
-            while (a == 0)
-            {
-                printf(resetar);
-                printf(apagar);
-                cursor(0, 0);
-                preencher(&comeco, backluz);
-                escreverCentro(&comeco, AVISO, 3, "CAIXA", backluz);
-                escreverCentro(&comeco, forcoelba, 7, "Relatorio pendente.", backluz);
-                escreverCentro(&comeco, forcoelba, 15, "Por favor, informe sua senha: ", backluz);
-                escreverCentro(&comeco, forcoelba, 19, "Digite aqui:              ", backluz);
-                if (a1 == 1){
-                    escreverCentro(&comeco, AVISO, 25, "Senha Incorreta!", backluz);
-                }
-                showtime(comeco);
-                char senha[12];
-                inputinhoTXT(&comeco, 19, 49, forpedro, senha);
-                rewind(data);
-
-                char lixo1[14];
-                char validacao[14];
-
-                fgets(lixo1, 14, data);
-                fgets(validacao, 14, data);
-                validacao[strcspn(validacao, "\r\n")] = '\0';
-                consertaEspaco(validacao);
-
-                if (strcmp(validacao, senha) == 0){
-                    a = 1;
-                }
-                else{
-                    a1 = 1;
-                }
-            }
             GERENTE(&comeco);
             socorro = 1;
         }
         else if (strcmp(categoria, "admin") == 0)
         {
-            int a = 0;
-            int a1 = 0;
-            while (a == 0)
-            {
-                printf(resetar);
-                printf(apagar);
-                cursor(0, 0);
-                preencher(&comeco, backozinha);
-                escreverCentro(&comeco, forozinha, 3, "SENAI CIMATEC", backozinha);
-                escreverCentro(&comeco, AVISO, 4, "UNIVERSIDADE", backozinha);
-                escreverCentro(&comeco, forcoelba, 7, "Saudacoes Sanval/Soussa!", backozinha);
-                escreverCentro(&comeco, forcoelba, 8, "O que traz o senhor a nossa humilde filial?", backozinha);
-                escreverCentro(&comeco, forcoelba, 16, "Por favor, informe sua senha: ", backozinha);
-                escreverCentro(&comeco, forcoelba, 20, "Digite aqui:              ", backozinha);
-                if (a1 == 1){
-                    escreverCentro(&comeco, AVISO, 25, "Senha Incorreta!", backozinha);
-                }
-                showtime(comeco);
-                char senha[12];
-                inputinhoTXT(&comeco, 20, 49, forpedro, senha);
-                rewind(data);
-
-                char lixo1[14];
-                char lixo2[14];
-                char validacao[14];
-
-                fgets(lixo1, 14, data);
-                fgets(lixo2, 14, data);
-                fgets(validacao, 14, data);
-                validacao[strcspn(validacao, "\r\n")] = '\0';
-                consertaEspaco(validacao);
-
-                if (strcmp(validacao, senha) == 0){
-                    a = 1;
-                }
-                else{
-                    a1 = 1;
-                }
-            }
             ADM(&comeco, armazen, &dinheiro, data2);
             socorro = 1;
         }
