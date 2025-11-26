@@ -169,7 +169,8 @@ void CLIENTE(tipomatrix *matrix, hamburguer cardapio[10]){
         sprintf(xx5, "Preco: R$ %.2f", cardapio[ll].preco);
         escreverCentro(matrix, forcoelba, 14, xx5, backode);
 
-        escreverCentro(matrix, forcoelba, 18, "Por favor, digite 'p' ou 'a'.", backode); 
+        escreverCentro(matrix, forcoelba, 18, "Digite 'p' (proximo), 'a' (anterior) ou 's' (sair)", backode);
+ 
 
         escreverCentro(matrix, forcoelba, 21, "Digite aqui:              ", backode);
         if (a3 == 1){
@@ -185,17 +186,21 @@ void CLIENTE(tipomatrix *matrix, hamburguer cardapio[10]){
             i++;
         }
 
-        if(strcmp(categoria, "a") == 0){
+        if(strcmp(categoria, "s") == 0){
+            return;  // <-- AQUI ELE SAI DO CLIENTE E VOLTA PARA O MENU
+        }
+        else if(strcmp(categoria, "a") == 0){
             if (ll > 0) {
                 ll = ll - 2; 
             } else {
                 ll = -1; 
-            }
+        }
         }
         else if (strcmp(categoria, "p") != 0){
             a3 = 1;
             ll--;
         }
+
     }
 }
 
