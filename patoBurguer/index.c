@@ -7,6 +7,7 @@
 #include "fila.h"
 #include "listade.h"
 #include "pilha.h"
+#include "AVL.h"
 
 #define backardapio "\033[48;2;0;0;0m" //dark
 #define forardapio "\033[1;38;2;255;146;1m" //laranja pato 
@@ -20,6 +21,9 @@
 #define backluz "\033[48;2;68;0;34m" //rosa bem escuro
 #define forcoelba "\033[2;38;2;255;255;0m" //amarelo luz 
 #define forpedro "\033[5;38;2;170;34;204m" //violeta
+/* depois de: #include "ingredientes_diarios.h" */
+NoAVL *consumoDiario = NULL;
+
 
 // Tela padrao = 96x27
 
@@ -206,139 +210,159 @@ void CLIENTE(tipomatrix *matrix, hamburguer cardapio[10]){
 
 void COZINHEIRO(tipomatrix *matrix, hamburguer cardapio[10], tp_pilha *pilhaa, FILE *data2, int *dinheiro, tp_listad *lista){
 
-    for (int xc = 0; xc < 5; xc++){
-        
-        // LIMPA A TELA E MOSTRA A NOITE
+    for (int xc = 0; xc < 5; xc++) {
+
+        // LIMPA A TELA E MOSTRA O TÍTULO DA NOITE
         printf(resetar);
         printf(apagar);
         cursor(0, 0);
         preencher(matrix, backardapio);
 
         char dia[50];
-        sprintf(dia, "Noite %d ", (xc+1));
+        sprintf(dia, "Noite %d ", (xc + 1));
         escreverCentro(matrix, forardapio, 2, dia, backardapio);
-        escreverCentro(matrix, forcoelba, 5, "Pedidos:", backardapio);
 
-        // SORTEIA O PEDIDO
-        int pedidool = rand() % 10;
-        char cansei[60];
-        sprintf(cansei, "Pedido: %s... Boa sorte!!", cardapio[pedidool].nome);
-        escreverCentro(matrix, forcoelba, 7, cansei, backardapio);
+        // QUANTIDADE DE HAMBÚRGUERES A SEREM FEITOS
+        int quantidadePedidos = (rand() % 4) + 2; // 2 a 5 hambúrgueres
+        char msgQtd[100];
+        sprintf(msgQtd, "Voce deve montar %d hamburgueres nesta noite!", quantidadePedidos);
+        escreverCentro(matrix, forcoelba, 5, msgQtd, backardapio);
 
-        // ---- MONTAR O HAMBURGUER DA NOITE ATUAL ----
-        int praqtantavar = 0;
+        showtime(*matrix);
+        sleep(1);
 
-        while (praqtantavar == 0){
+        // ==============================
+        //   LOOP DOS PEDIDOS DA NOITE
+        // ==============================
+        for (int pedidoIndex = 0; pedidoIndex < quantidadePedidos; pedidoIndex++) {
 
-            escreverCentro(matrix, forcoelba, 10, "Digite os ingredientes na ordem!!", backardapio);
-            escreverCentro(matrix, forcoelba, 11, "Insira o ingrediente: ", backardapio);
-
-            // MOSTRAR A PILHA CRESCENDO
-            if (!pilhaVazia(pilhaa)) {      /*empilhamento*/
-                int linha = 15;
-                int topo = alturaPilha(pilhaa) - 1; /*kk*/
-
-                for (int k = topo; k >= 0; k--) {
-                    escreverCentro(matrix, forcoelba, linha, pilhaa->item[k]->nome, backardapio);
-                    linha++;
-                }
-            }
-
-            showtime(*matrix);
-
-            char INGed[12];
-            inputinhoTXT(matrix, 11, 60, forpedro, INGed);
-
-            // LIMPA TELA
             printf(resetar);
             printf(apagar);
             cursor(0, 0);
+            preencher(matrix, backardapio);
 
-            // CONVERTE PARA MINÚSCULO
-            for (int i = 0; INGed[i] != '\0'; i++)
-                INGed[i] = tolower(INGed[i]);
+            // mostra estoque à direita
+            imprimirEstoqueDireita(matrix, lista, backardapio);
 
-            int ingredienteValido = 0;
-            int semEstoque = 0;
+            // sorteia um hamburger
+            int pedidool = rand() % 10;
 
-            for (int cuntador = 0; cuntador < 15; cuntador++){
+            char tituloPedido[150];
+            sprintf(tituloPedido, "Pedido %d/%d: %s",
+                    pedidoIndex + 1, quantidadePedidos, cardapio[pedidool].nome);
 
-                char nomeEstoqueMinusculo[20];
-                strcpy(nomeEstoqueMinusculo, estoque[cuntador].nome);
+            escreverCentro(matrix, forcoelba, 7, tituloPedido, backardapio);
 
-                for (int k = 0; nomeEstoqueMinusculo[k] != '\0'; k++)
-                    nomeEstoqueMinusculo[k] = tolower(nomeEstoqueMinusculo[k]);
+            int praqtantavar = 0;
 
-                if (strcmp(INGed, nomeEstoqueMinusculo) == 0){
+            // ==============================
+            //     LOOP DE MONTAGEM
+            // ==============================
+            while (praqtantavar == 0) {
 
-                    ingredienteValido = 1;
+                escreverCentro(matrix, forcoelba, 10, "Digite os ingredientes na ordem correta!", backardapio);
+                escreverCentro(matrix, forcoelba, 11, "Ingrediente: ", backardapio);
 
-                    tp_no* itemNoEstoque = busca_listade(lista, estoque[cuntador]);
+                // Mostra a pilha (hamburguer sendo montado)
+                if (!pilhaVazia(pilhaa)) {
+                    int linha = 15;
+                    int topo = alturaPilha(pilhaa) - 1;
 
-                    if (itemNoEstoque != NULL){
-                        push(pilhaa, &estoque[cuntador]);
-                        remove_listad(lista, estoque[cuntador]);
-                    } 
-                    else {
-                        semEstoque = 1;
+                    for (int k = topo; k >= 0; k--) {
+                        escreverCentro(matrix, forcoelba, linha, pilhaa->item[k]->nome, backardapio);
+                        linha++;
                     }
+                }
 
-                    break;
+                // Estoque novamente à direita
+                imprimirEstoqueDireita(matrix, lista, backardapio);
+
+                showtime(*matrix);
+
+                char INGed[40];
+                inputinhoTXT(matrix, 11, 60, forpedro, INGed);
+
+                // limpa tela
+                printf(resetar);
+                printf(apagar);
+                cursor(0,0);
+
+                // minúsculo
+                for (int i = 0; INGed[i] != '\0'; i++)
+                    INGed[i] = tolower(INGed[i]);
+
+                int ingredienteValido = 0;
+                int semEstoque = 0;
+
+                // CHECA INGREDIENTE
+                for (int c = 0; c < 15; c++) {
+
+                    char nomeEstoqueMinusculo[50];
+                    strcpy(nomeEstoqueMinusculo, estoque[c].nome);
+                    for (int k = 0; nomeEstoqueMinusculo[k] != '\0'; k++)
+                        nomeEstoqueMinusculo[k] = tolower(nomeEstoqueMinusculo[k]);
+
+                    if (strcmp(INGed, nomeEstoqueMinusculo) == 0) {
+
+                        ingredienteValido = 1;
+
+                        tp_no *no = busca_listade(lista, estoque[c]);
+                        if (no != NULL) {
+                            push(pilhaa, &estoque[c]);
+                            remove_listad(lista, estoque[c]);
+                        } else {
+                            semEstoque = 1;
+                        }
+                        break;
+                    }
+                }
+
+                // tratativas
+                if (semEstoque == 1) {
+                    escreverCentro(matrix, AVISO, 24, "Sem estoque desse ingrediente!", backardapio);
+                }
+                else if (ingredienteValido == 0) {
+                    escreverCentro(matrix, AVISO, 24, "Ingrediente invalido!", backardapio);
+                }
+                else {
+                    if (alturaPilha(pilhaa) == cardapio[pedidool].qntIngredientes) {
+                        praqtantavar = 1;
+                    }
                 }
             }
 
-            if (semEstoque == 1){
-                escreverCentro(matrix, AVISO, 24, "Acabou! Você não tem mais esse ingrediente.", backardapio);
+            // ====================================
+            //      VERIFICAÇÃO DOS ERROS
+            // ====================================
+            int erros = 0;
+            for (int i = 0; i < alturaPilha(pilhaa); i++) {
+                if (strcmp(pilhaa->item[i]->nome, cardapio[pedidool].ingredientes[i]) != 0)
+                    erros++;
             }
-            else if (ingredienteValido == 0){
-                escreverCentro(matrix, AVISO, 24, "Ingrediente inválido! Digite um nome correto.", backardapio);
-            }
-            else {
-                if (alturaPilha(pilhaa) == cardapio[pedidool].qntIngredientes){
-                    praqtantavar = 1;
-                }
-            }
+
+            int ganho = (cardapio[pedidool].preco / (erros + 1));
+            *dinheiro += ganho;
+
+            rewind(data2);
+            imprime_listad2salva(lista, data2, *dinheiro);
+            fflush(data2);
+
+            char msgFinal[150];
+            sprintf(msgFinal,
+                    "Pedido %d finalizado! Erros: %d | Dinheiro ganho: %d",
+                    pedidoIndex + 1, erros, ganho);
+
+            escreverCentro(matrix, forcoelba, 24, msgFinal, backardapio);
+
+            showtime(*matrix);
+
+            char pausa[10];
+            inputinhoTXT(matrix, 25, 75, forpedro, pausa);
+
+            inicializa_pilha(pilhaa);
         }
-
-        // ---- VERIFICAÇÃO DOS ERROS ----
-        int errrros = 0;
-        for (int yyyy = 0; yyyy < alturaPilha(pilhaa); yyyy++){
-            if (strcmp(pilhaa->item[yyyy]->nome, cardapio[pedidool].ingredientes[yyyy]) != 0){
-                errrros++;
-            }
-        }
-
-        // ---- CALCULA DINHEIRO ----
-        int ganho = (cardapio[pedidool].preco / (errrros + 1));
-        *dinheiro += ganho;
-
-        rewind(data2);
-        imprime_listad2salva(lista, data2, *dinheiro);
-        fflush(data2);
-
-        // ---- MENSAGEM FINAL ----
-        if (errrros > 0){
-            char msg[200];
-            sprintf(msg, "Você errou %d ingredientes, por isso ganhou apenas %d dinheiros", errrros, ganho);
-            escreverCentro(matrix, forcoelba, 24, msg, backardapio);
-        }
-        else{
-            char msg[200];
-            sprintf(msg, "Perfeito! Você ganhou %d dinheiros.", ganho);
-            escreverCentro(matrix, forcoelba, 24, msg, backardapio);
-        }
-
-        escreverCentro(matrix, forcoelba, 25, "Digite algo e aperte ENTER para avançar a madrugada:", backardapio);
-        showtime(*matrix);
-
-        char senha[12];
-        inputinhoTXT(matrix, 25, 75, forpedro, senha);
-
-        // ---- LIMPANDO A PILHA PARA A PRÓXIMA NOITE ----
-        inicializa_pilha(pilhaa);
     }
 }
-
 
 void GARCOM(tipomatrix *matrix, hamburguer cardapio[10], struct Fila* f){
 
@@ -411,6 +435,37 @@ int conta_estoque(tp_listad *lista, ingrediente item) {
     }
     return count;
 }
+
+
+void imprimirEstoqueDireita(tipomatrix *matrix, tp_listad *lista, char back[]) {
+    int linha = 3;
+    int coluna = largura - 25; // 25 colunas da borda direita
+
+    // Título
+    strcpy(matrix->espaco[linha][coluna], forcoelba);
+    strcat(matrix->espaco[linha][coluna], "ESTOQUE");
+    strcat(matrix->espaco[linha][coluna], resetar);
+    linha += 2;
+
+    // Ingredientes
+    for (int i = 0; i < 15; i++) {
+        int qtd = conta_estoque(lista, estoque[i]);
+
+        char texto[60];
+        sprintf(texto, "%-12s %3d", estoque[i].nome, qtd);
+
+        int k = 0;
+        while (texto[k] != '\0') {
+            char c[2] = {texto[k], '\0'};
+            strcpy(matrix->espaco[linha][coluna + k], c);
+            k++;
+        }
+
+        linha++;
+    }
+}
+
+
 
 void ADM_comprar(tipomatrix *matrix, tp_listad *lista, int *dinheiro, FILE *data2) {
     int pagina = 0;              // controla a página de itens (0 ou 1)
@@ -704,6 +759,8 @@ int main()
     FILE *data2;
     data2 = fopen("logy.txt", "w+");
 
+
+
     //O jogador vai começar com: 
     //1000 Patocoins
     //80 pães
@@ -785,8 +842,8 @@ int main()
     escreverCentro(&comeco, forcoelba, 12, "Por favor, informe sua categoria de ingresso: ", backode); 
     escreverCentro(&comeco, forcoelba, 14, "--> cliente <--", backode);
     escreverCentro(&comeco, forcoelba, 15, "--> cozinha <--", backode);
-    escreverCentro(&comeco, forcoelba, 17, "EM MANUTENCAO --> caixa <-- EM MANUTENCAO", backode);
-    escreverCentro(&comeco, forcoelba, 18, "--> admin <--", backode);
+    escreverCentro(&comeco, forcoelba, 16, "--> caixa <--", backode);
+    escreverCentro(&comeco, forcoelba, 17, "--> admin <--", backode);
     escreverCentro(&comeco, forcoelba, 21, "Digite aqui:              ", backode);
     showtime(comeco);
     char categoria[12];
@@ -835,10 +892,9 @@ int main()
         escreverCentro(&comeco, forcoelba, 10, "Hoje estarei te auxiliando nesta filial.", backode);
         escreverCentro(&comeco, forcoelba, 12, "Por favor, informe sua categoria de ingresso: ", backode); 
         escreverCentro(&comeco, forcoelba, 14, "--> cliente <--", backode);
-        escreverCentro(&comeco, forcoelba, 15, "EM MANUTENCAO --> cozinheiro <-- EM MANUTENCAO", backode);
-        escreverCentro(&comeco, forcoelba, 16, "--> garcom <--", backode);
-        escreverCentro(&comeco, forcoelba, 17, "EM MANUTENCAO --> caixa <-- EM MANUTENCAO", backode);
-        escreverCentro(&comeco, forcoelba, 18, "EM MANUTENCAO --> admin <-- EM MANUTENCAO", backode);
+        escreverCentro(&comeco, forcoelba, 15, "--> cozinha <--", backode);
+        escreverCentro(&comeco, forcoelba, 16, "--> caixa <--", backode);
+        escreverCentro(&comeco, forcoelba, 17, "--> admin <--", backode);
         escreverCentro(&comeco, forcoelba, 21, "Digite aqui:              ", backode);
 
         if (socorro == 0){
@@ -858,6 +914,11 @@ int main()
     fclose(data);
     fclose(data2);
     destroi_listad(armazen);
+
+    FILE *consumoFile = fopen("consumo_diario.txt", "w");
+    salvarConsumo(consumoDiario, consumoFile);
+    fclose(consumoFile);
+
 
     return 0;
 }
