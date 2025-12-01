@@ -97,6 +97,7 @@ void escreverCentro(tipomatrix *matrix, char formatacao[], int linha, char frase
 }
 
 int conta_estoque(tp_listad *lista, ingrediente item);
+void imprimirEstoqueDireita(tipomatrix *matrix, tp_listad *lista, char back[]); // Prototipo
 
 void imprime_listad2salva(tp_listad *lista, FILE *data2, int dindin) {
     
@@ -212,6 +213,14 @@ void COZINHEIRO(tipomatrix *matrix, hamburguer cardapio[10], tp_pilha *pilhaa, F
 
     for (int xc = 0; xc < 5; xc++) {
 
+        // ============================================
+        // VARIÁVEIS DO RELATÓRIO DIÁRIO
+        // ============================================
+        float custo_diario_ingredientes = 0.0;
+        float ganho_diario_vendas = 0.0;
+        int qtd_ingredientes_usados[15] = {0}; // Zera contadores de ingredientes (IDs 0-14)
+        // ============================================
+
         // LIMPA A TELA E MOSTRA O TÍTULO DA NOITE
         printf(resetar);
         printf(apagar);
@@ -310,6 +319,12 @@ void COZINHEIRO(tipomatrix *matrix, hamburguer cardapio[10], tp_pilha *pilhaa, F
                         if (no != NULL) {
                             push(pilhaa, &estoque[c]);
                             remove_listad(lista, estoque[c]);
+                            
+                            // --- ATUALIZA RELATÓRIO ---
+                            custo_diario_ingredientes += estoque[c].preco;
+                            qtd_ingredientes_usados[c]++;
+                            // --------------------------
+
                         } else {
                             semEstoque = 1;
                         }
@@ -342,6 +357,10 @@ void COZINHEIRO(tipomatrix *matrix, hamburguer cardapio[10], tp_pilha *pilhaa, F
 
             int ganho = (cardapio[pedidool].preco / (erros + 1));
             *dinheiro += ganho;
+            
+            // --- ATUALIZA RELATÓRIO ---
+            ganho_diario_vendas += (float)ganho;
+            // --------------------------
 
             rewind(data2);
             imprime_listad2salva(lista, data2, *dinheiro);
@@ -361,6 +380,69 @@ void COZINHEIRO(tipomatrix *matrix, hamburguer cardapio[10], tp_pilha *pilhaa, F
 
             inicializa_pilha(pilhaa);
         }
+
+        // =========================================================
+        // TELA DE RELATÓRIO DIÁRIO (FIM DA NOITE)
+        // =========================================================
+        printf(resetar);
+        printf(apagar);
+        cursor(0, 0);
+        preencher(matrix, backardapio);
+
+        char tituloRelatorio[50];
+        sprintf(tituloRelatorio, "RELATORIO FINAL - NOITE %d", xc + 1);
+        escreverCentro(matrix, AVISO, 2, tituloRelatorio, backardapio);
+        escreverCentro(matrix, forcoelba, 4, "--- Ingredientes Consumidos ---", backardapio);
+
+        int linhaRelatorio = 6;
+        int itens_mostrados = 0;
+        
+        // Coluna da esquerda (Ingredientes)
+        for (int i = 0; i < 15; i++) {
+            if (qtd_ingredientes_usados[i] > 0) {
+                char strItem[60];
+                sprintf(strItem, "%-15s: %d un", estoque[i].nome, qtd_ingredientes_usados[i]);
+                
+                // Ajuste simples para centralizar um pouco
+                int offset = (largura / 2) - 20;
+                // Como escreverCentro centraliza, vamos apenas mandar a string
+                escreverCentro(matrix, forcoelba, linhaRelatorio, strItem, backardapio);
+                
+                linhaRelatorio++;
+                if(linhaRelatorio > 18) break; // Evita estourar a tela se tiver muita coisa
+            }
+        }
+
+        // Se não gastou nada (impossível no jogo normal, mas bom tratar)
+        if (linhaRelatorio == 6) {
+             escreverCentro(matrix, forcoelba, 7, "Nenhum ingrediente gasto.", backardapio);
+             linhaRelatorio = 9;
+        }
+
+        // Bloco Financeiro (Parte inferior)
+        linhaRelatorio = (linhaRelatorio < 19) ? 19 : linhaRelatorio + 1;
+        
+        escreverCentro(matrix, forcoelba, linhaRelatorio, "--- Balanco Financeiro ---", backardapio);
+        
+        char strGanho[60], strGasto[60], strLucro[60];
+        
+        sprintf(strGanho, "Ganho (Vendas):     R$ %.2f", ganho_diario_vendas);
+        sprintf(strGasto, "Gasto (Ingredientes): R$ %.2f", custo_diario_ingredientes);
+        
+        float lucro_liquido = ganho_diario_vendas - custo_diario_ingredientes;
+        sprintf(strLucro, "Saldo Liquido:      R$ %.2f", lucro_liquido);
+
+        escreverCentro(matrix, forcoelba, linhaRelatorio + 1, strGanho, backardapio);
+        escreverCentro(matrix, AVISO, linhaRelatorio + 2, strGasto, backardapio);
+        
+        // Muda cor do lucro se for positivo ou negativo (visual simples)
+        escreverCentro(matrix, (lucro_liquido >= 0 ? forcoelba : AVISO), linhaRelatorio + 3, strLucro, backardapio);
+
+        escreverCentro(matrix, forcoelba, 26, "Pressione ENTER para a proxima noite...", backardapio);
+        showtime(*matrix);
+        
+        char dummy[10];
+        inputinhoTXT(matrix, 26, 80, forpedro, dummy);
     }
 }
 
