@@ -103,8 +103,6 @@ void salvarConsumo(NoAVL *raiz, FILE *arquivo) {
     fprintf(arquivo, "%s %d\n", raiz->nome, raiz->quantidade);
     salvarConsumo(raiz->dir, arquivo);
 }
-
-
-
+NoAVL *consumoDiario = NULL;
 
 #endif

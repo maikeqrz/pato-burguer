@@ -22,7 +22,7 @@
 #define forcoelba "\033[2;38;2;255;255;0m" //amarelo luz 
 #define forpedro "\033[5;38;2;170;34;204m" //violeta
 /* depois de: #include "ingredientes_diarios.h" */
-NoAVL *consumoDiario = NULL;
+
 
 
 // Tela padrao = 96x27
@@ -211,17 +211,17 @@ void CLIENTE(tipomatrix *matrix, hamburguer cardapio[10]){
 
 void COZINHEIRO(tipomatrix *matrix, hamburguer cardapio[10], tp_pilha *pilhaa, FILE *data2, int *dinheiro, tp_listad *lista){
 
+    // GAME OVER caso o jogador entre na cozinha com 0 ou menos
+    if (*dinheiro <= 0) {
+        GameOver(matrix);
+    }
+
     for (int xc = 0; xc < 5; xc++) {
 
-        // ============================================
-        // VARIÁVEIS DO RELATÓRIO DIÁRIO
-        // ============================================
         float custo_diario_ingredientes = 0.0;
         float ganho_diario_vendas = 0.0;
-        int qtd_ingredientes_usados[15] = {0}; // Zera contadores de ingredientes (IDs 0-14)
-        // ============================================
+        int qtd_ingredientes_usados[15] = {0};
 
-        // LIMPA A TELA E MOSTRA O TÍTULO DA NOITE
         printf(resetar);
         printf(apagar);
         cursor(0, 0);
@@ -231,8 +231,7 @@ void COZINHEIRO(tipomatrix *matrix, hamburguer cardapio[10], tp_pilha *pilhaa, F
         sprintf(dia, "Noite %d ", (xc + 1));
         escreverCentro(matrix, forardapio, 2, dia, backardapio);
 
-        // QUANTIDADE DE HAMBÚRGUERES A SEREM FEITOS
-        int quantidadePedidos = (rand() % 4) + 2; // 2 a 5 hambúrgueres
+        int quantidadePedidos = (rand() % 4) + 2;
         char msgQtd[100];
         sprintf(msgQtd, "Voce deve montar %d hamburgueres nesta noite!", quantidadePedidos);
         escreverCentro(matrix, forcoelba, 5, msgQtd, backardapio);
@@ -240,9 +239,6 @@ void COZINHEIRO(tipomatrix *matrix, hamburguer cardapio[10], tp_pilha *pilhaa, F
         showtime(*matrix);
         sleep(1);
 
-        // ==============================
-        //   LOOP DOS PEDIDOS DA NOITE
-        // ==============================
         for (int pedidoIndex = 0; pedidoIndex < quantidadePedidos; pedidoIndex++) {
 
             printf(resetar);
@@ -250,10 +246,8 @@ void COZINHEIRO(tipomatrix *matrix, hamburguer cardapio[10], tp_pilha *pilhaa, F
             cursor(0, 0);
             preencher(matrix, backardapio);
 
-            // mostra estoque à direita
             imprimirEstoqueDireita(matrix, lista, backardapio);
 
-            // sorteia um hamburger
             int pedidool = rand() % 10;
 
             char tituloPedido[150];
@@ -264,15 +258,11 @@ void COZINHEIRO(tipomatrix *matrix, hamburguer cardapio[10], tp_pilha *pilhaa, F
 
             int praqtantavar = 0;
 
-            // ==============================
-            //     LOOP DE MONTAGEM
-            // ==============================
             while (praqtantavar == 0) {
 
                 escreverCentro(matrix, forcoelba, 10, "Digite os ingredientes na ordem correta!", backardapio);
                 escreverCentro(matrix, forcoelba, 11, "Ingrediente: ", backardapio);
 
-                // Mostra a pilha (hamburguer sendo montado)
                 if (!pilhaVazia(pilhaa)) {
                     int linha = 15;
                     int topo = alturaPilha(pilhaa) - 1;
@@ -283,7 +273,6 @@ void COZINHEIRO(tipomatrix *matrix, hamburguer cardapio[10], tp_pilha *pilhaa, F
                     }
                 }
 
-                // Estoque novamente à direita
                 imprimirEstoqueDireita(matrix, lista, backardapio);
 
                 showtime(*matrix);
@@ -291,19 +280,16 @@ void COZINHEIRO(tipomatrix *matrix, hamburguer cardapio[10], tp_pilha *pilhaa, F
                 char INGed[40];
                 inputinhoTXT(matrix, 11, 60, forpedro, INGed);
 
-                // limpa tela
                 printf(resetar);
                 printf(apagar);
                 cursor(0,0);
 
-                // minúsculo
                 for (int i = 0; INGed[i] != '\0'; i++)
                     INGed[i] = tolower(INGed[i]);
 
                 int ingredienteValido = 0;
                 int semEstoque = 0;
 
-                // CHECA INGREDIENTE
                 for (int c = 0; c < 15; c++) {
 
                     char nomeEstoqueMinusculo[50];
@@ -319,12 +305,9 @@ void COZINHEIRO(tipomatrix *matrix, hamburguer cardapio[10], tp_pilha *pilhaa, F
                         if (no != NULL) {
                             push(pilhaa, &estoque[c]);
                             remove_listad(lista, estoque[c]);
-                            
-                            // --- ATUALIZA RELATÓRIO ---
+
                             custo_diario_ingredientes += estoque[c].preco;
                             qtd_ingredientes_usados[c]++;
-                            // --------------------------
-
                         } else {
                             semEstoque = 1;
                         }
@@ -332,7 +315,6 @@ void COZINHEIRO(tipomatrix *matrix, hamburguer cardapio[10], tp_pilha *pilhaa, F
                     }
                 }
 
-                // tratativas
                 if (semEstoque == 1) {
                     escreverCentro(matrix, AVISO, 24, "Sem estoque desse ingrediente!", backardapio);
                 }
@@ -346,9 +328,6 @@ void COZINHEIRO(tipomatrix *matrix, hamburguer cardapio[10], tp_pilha *pilhaa, F
                 }
             }
 
-            // ====================================
-            //      VERIFICAÇÃO DOS ERROS
-            // ====================================
             int erros = 0;
             for (int i = 0; i < alturaPilha(pilhaa); i++) {
                 if (strcmp(pilhaa->item[i]->nome, cardapio[pedidool].ingredientes[i]) != 0)
@@ -357,10 +336,18 @@ void COZINHEIRO(tipomatrix *matrix, hamburguer cardapio[10], tp_pilha *pilhaa, F
 
             int ganho = (cardapio[pedidool].preco / (erros + 1));
             *dinheiro += ganho;
-            
-            // --- ATUALIZA RELATÓRIO ---
+
+            // GAME OVER durante a montagem (prejuízo imediato)
+            if (*dinheiro <= 0) {
+                GameOver(matrix);
+            }
+
+            // GAME OVER caso dinheiro fique negativo por algum motivo
+            if (*dinheiro <= 0) {
+                GameOver(matrix);
+            }
+
             ganho_diario_vendas += (float)ganho;
-            // --------------------------
 
             rewind(data2);
             imprime_listad2salva(lista, data2, *dinheiro);
@@ -381,61 +368,55 @@ void COZINHEIRO(tipomatrix *matrix, hamburguer cardapio[10], tp_pilha *pilhaa, F
             inicializa_pilha(pilhaa);
         }
 
-        // =========================================================
-        // TELA DE RELATÓRIO DIÁRIO (FIM DA NOITE)
-        // =========================================================
+        // ===============================
+        // FINAL DA NOITE
+        // ===============================
+
         printf(resetar);
         printf(apagar);
         cursor(0, 0);
         preencher(matrix, backardapio);
 
+        float lucro_liquido = ganho_diario_vendas - custo_diario_ingredientes;
+
+        // GAME OVER: lucro negativo + caixa sem dinheiro
+        if (*dinheiro + lucro_liquido <= 0) {
+            *dinheiro = 0;
+            GameOver(matrix);
+        }
+
         char tituloRelatorio[50];
         sprintf(tituloRelatorio, "RELATORIO FINAL - NOITE %d", xc + 1);
         escreverCentro(matrix, AVISO, 2, tituloRelatorio, backardapio);
-        escreverCentro(matrix, forcoelba, 4, "--- Ingredientes Consumidos ---", backardapio);
 
         int linhaRelatorio = 6;
-        int itens_mostrados = 0;
-        
-        // Coluna da esquerda (Ingredientes)
+
         for (int i = 0; i < 15; i++) {
             if (qtd_ingredientes_usados[i] > 0) {
                 char strItem[60];
                 sprintf(strItem, "%-15s: %d un", estoque[i].nome, qtd_ingredientes_usados[i]);
-                
-                // Ajuste simples para centralizar um pouco
-                int offset = (largura / 2) - 20;
-                // Como escreverCentro centraliza, vamos apenas mandar a string
                 escreverCentro(matrix, forcoelba, linhaRelatorio, strItem, backardapio);
-                
                 linhaRelatorio++;
-                if(linhaRelatorio > 18) break; // Evita estourar a tela se tiver muita coisa
+                if(linhaRelatorio > 18) break;
             }
         }
 
-        // Se não gastou nada (impossível no jogo normal, mas bom tratar)
         if (linhaRelatorio == 6) {
              escreverCentro(matrix, forcoelba, 7, "Nenhum ingrediente gasto.", backardapio);
              linhaRelatorio = 9;
         }
 
-        // Bloco Financeiro (Parte inferior)
         linhaRelatorio = (linhaRelatorio < 19) ? 19 : linhaRelatorio + 1;
-        
-        escreverCentro(matrix, forcoelba, linhaRelatorio, "--- Balanco Financeiro ---", backardapio);
-        
+
         char strGanho[60], strGasto[60], strLucro[60];
         
         sprintf(strGanho, "Ganho (Vendas):     R$ %.2f", ganho_diario_vendas);
         sprintf(strGasto, "Gasto (Ingredientes): R$ %.2f", custo_diario_ingredientes);
-        
-        float lucro_liquido = ganho_diario_vendas - custo_diario_ingredientes;
         sprintf(strLucro, "Saldo Liquido:      R$ %.2f", lucro_liquido);
 
+        escreverCentro(matrix, forcoelba, linhaRelatorio, "--- Balanco Financeiro ---", backardapio);
         escreverCentro(matrix, forcoelba, linhaRelatorio + 1, strGanho, backardapio);
         escreverCentro(matrix, AVISO, linhaRelatorio + 2, strGasto, backardapio);
-        
-        // Muda cor do lucro se for positivo ou negativo (visual simples)
         escreverCentro(matrix, (lucro_liquido >= 0 ? forcoelba : AVISO), linhaRelatorio + 3, strLucro, backardapio);
 
         escreverCentro(matrix, forcoelba, 26, "Pressione ENTER para a proxima noite...", backardapio);
@@ -445,6 +426,7 @@ void COZINHEIRO(tipomatrix *matrix, hamburguer cardapio[10], tp_pilha *pilhaa, F
         inputinhoTXT(matrix, 26, 80, forpedro, dummy);
     }
 }
+
 
 void GARCOM(tipomatrix *matrix, hamburguer cardapio[10], struct Fila* f){
 
@@ -550,13 +532,18 @@ void imprimirEstoqueDireita(tipomatrix *matrix, tp_listad *lista, char back[]) {
 
 
 void ADM_comprar(tipomatrix *matrix, tp_listad *lista, int *dinheiro, FILE *data2) {
-    int pagina = 0;              // controla a página de itens (0 ou 1)
-    int sair_compra = 0;         // flag para sair do menu
-    char escolha[10];            // guarda a entrada do usuário
-    char msg_erro[100] = "";     // mensagens de erro ou confirmação
+    int pagina = 0;
+    int sair_compra = 0;
+    char escolha[10];
+    char msg_erro[100] = "";
 
     while (!sair_compra) {
-        // limpa a tela e desenha o fundo
+
+        // GAME OVER AUTOMÁTICO
+        if (*dinheiro <= 0) {
+            GameOver(matrix);
+        }
+
         printf(resetar);
         printf(apagar);
         cursor(0, 0);
@@ -564,53 +551,44 @@ void ADM_comprar(tipomatrix *matrix, tp_listad *lista, int *dinheiro, FILE *data
 
         escreverCentro(matrix, forozinha, 2, "--- COMPRAR INGREDIENTES ---", backozinha);
 
-        // Mostra o saldo atual do jogador
         char dindin_str[50];
         sprintf(dindin_str, "Patocoins: %d", *dinheiro);
         escreverCentro(matrix, forcoelba, 4, dindin_str, backozinha);
 
-        // Exibe de 8 em 8 ingredientes (paginação)
         int start = pagina * 8; 
         int end = (pagina == 0) ? 8 : 15;
         int linha_item = 6;
 
         for (int i = start; i < end; i++) {
-            // Exibe o ID, nome e preço de cada ingrediente do estoque global
             char item_str[100];
             sprintf(item_str, "%d. %-20s - Preco: R$ %.2f", i, estoque[i].nome, estoque[i].preco);
             escreverCentro(matrix, forcoelba, linha_item, item_str, backozinha);
             linha_item++;
         }
 
-        // Opções para o jogador
         escreverCentro(matrix, forcoelba, 20, "Digite ID (comprar), 'p' (prox), 'a' (ant), 's' (sair)", backozinha);
         escreverCentro(matrix, forcoelba, 22, "Digite aqui:              ", backozinha);
         
-        // Exibe mensagem de erro se existir
         if (strlen(msg_erro) > 0) {
             escreverCentro(matrix, AVISO, 25, msg_erro, backozinha);
-            strcpy(msg_erro, ""); 
+            strcpy(msg_erro, "");
         }
 
-        showtime(*matrix); // mostra a interface atualizada
+        showtime(*matrix);
         inputinhoTXT(matrix, 22, 49, forpedro, escolha);
 
-        // Converte tudo para minúsculo para evitar erro de digitação
         for(int i = 0; escolha[i]; i++) escolha[i] = tolower(escolha[i]);
 
-        // --- Comandos de navegação ---
         if (strcmp(escolha, "s") == 0) { sair_compra = 1; continue; }
         else if (strcmp(escolha, "p") == 0) { pagina = 1; continue; }
         else if (strcmp(escolha, "a") == 0) { pagina = 0; continue; }
 
-        // Converte o ID digitado em número
         int id = atoi(escolha);
         if (id < 0 || id > 14 || (id == 0 && strcmp(escolha, "0") != 0)) {
             sprintf(msg_erro, "ID '%s' invalido. Tente novamente.", escolha);
             continue;
         }
 
-        // Pede a quantidade desejada
         escreverCentro(matrix, forcoelba, 22, "Quantidade:               ", backozinha);
         showtime(*matrix);
         char qtd_str[10];
@@ -622,23 +600,23 @@ void ADM_comprar(tipomatrix *matrix, tp_listad *lista, int *dinheiro, FILE *data
             continue;
         }
 
-        // Calcula o custo total da compra
         float custo = estoque[id].preco * qtd;
         if (*dinheiro < custo) {
             sprintf(msg_erro, "Dinheiro insuficiente! Custo: %.2f", custo);
             continue;
         }
 
-        // --- ALOCAÇÃO DINÂMICA AQUI ---
-        // Cada ingrediente comprado é adicionado dinamicamente à lista.
-        // Isso significa que a função insere_listad_no_fim() faz malloc()
-        // e adiciona um novo nó no final da lista encadeada.
-        *dinheiro -= (int)custo; 
-        for (int i = 0; i < qtd; i++) {
-            insere_listad_no_fim(lista, estoque[id]);  // aloca e adiciona
+        *dinheiro -= (int)custo;
+
+        // VERIFICA GAME OVER DEPOIS DE GASTAR
+        if (*dinheiro <= 0) {
+            GameOver(matrix);
         }
 
-        // Atualiza o arquivo de log com o novo estoque e dinheiro
+        for (int i = 0; i < qtd; i++) {
+            insere_listad_no_fim(lista, estoque[id]);
+        }
+
         rewind(data2);
         imprime_listad2salva(lista, data2, *dinheiro);
         fflush(data2);
@@ -646,6 +624,7 @@ void ADM_comprar(tipomatrix *matrix, tp_listad *lista, int *dinheiro, FILE *data
         sprintf(msg_erro, "Compra de %d %s(s) realizada!", qtd, estoque[id].nome);
     }
 }
+
 
 void ADM_vender(tipomatrix *matrix, tp_listad *lista, int *dinheiro, FILE *data2) {
     int pagina = 0;
@@ -820,6 +799,23 @@ void ADM(tipomatrix *matrix, tp_listad *lista, int *dinheiro, FILE *data2){
     }
 }
 
+void GameOver(tipomatrix *matrix) {
+    printf(resetar);
+    printf(apagar);
+    cursor(0,0);
+
+    preencher(matrix, backluz);
+    escreverCentro(matrix, AVISO, 10, "GAME OVER!", backluz);
+    escreverCentro(matrix, forcoelba, 14, "A empresa faliu. Dinheiro chegou a zero.", backluz);
+    escreverCentro(matrix, forcoelba, 18, "Encerrando o jogo...", backluz);
+
+    showtime(*matrix);
+    sleep(2);
+    exit(0);
+}
+
+
+
 int main()
 {
 
@@ -840,6 +836,9 @@ int main()
 
     FILE *data2;
     data2 = fopen("logy.txt", "w+");
+
+    
+    
 
 
 
