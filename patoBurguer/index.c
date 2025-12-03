@@ -923,12 +923,11 @@ int main()
     escreverCentro(&comeco, forcoelba, 12, "Por favor, informe sua categoria de ingresso: ", backode); 
     escreverCentro(&comeco, forcoelba, 14, "--> cliente <--", backode);
     escreverCentro(&comeco, forcoelba, 15, "--> cozinha <--", backode);
-    escreverCentro(&comeco, forcoelba, 16, "--> caixa <--", backode);
-    escreverCentro(&comeco, forcoelba, 17, "--> admin <--", backode);
-    escreverCentro(&comeco, forcoelba, 21, "Digite aqui:              ", backode);
+    escreverCentro(&comeco, forcoelba, 16, "--> admin <--", backode);
+    escreverCentro(&comeco, forcoelba, 20, "Digite aqui:              ", backode);
     showtime(comeco);
     char categoria[12];
-    inputinhoTXT(&comeco, 21, 49, forpedro, categoria);
+    inputinhoTXT(&comeco, 20, 49, forpedro, categoria);
     int i = 0;
     while (categoria[i] != '\0') {
         categoria[i] = tolower(categoria[i]);
@@ -974,8 +973,7 @@ int main()
         escreverCentro(&comeco, forcoelba, 12, "Por favor, informe sua categoria de ingresso: ", backode); 
         escreverCentro(&comeco, forcoelba, 14, "--> cliente <--", backode);
         escreverCentro(&comeco, forcoelba, 15, "--> cozinha <--", backode);
-        escreverCentro(&comeco, forcoelba, 16, "--> caixa <--", backode);
-        escreverCentro(&comeco, forcoelba, 17, "--> admin <--", backode);
+        escreverCentro(&comeco, forcoelba, 16, "--> admin <--", backode);
         escreverCentro(&comeco, forcoelba, 21, "Digite aqui:              ", backode);
 
         if (socorro == 0){
