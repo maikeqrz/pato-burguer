@@ -262,6 +262,7 @@ void COZINHEIRO(tipomatrix *matrix, hamburguer cardapio[10], tp_pilha *pilhaa, F
 
                 escreverCentro(matrix, forcoelba, 10, "Digite os ingredientes na ordem correta!", backardapio);
                 escreverCentro(matrix, forcoelba, 11, "Ingrediente: ", backardapio);
+                
 
                 // Mostra a pilha (hamburguer sendo montado)
                 if (!pilhaVazia(pilhaa)) {
@@ -360,6 +361,8 @@ void COZINHEIRO(tipomatrix *matrix, hamburguer cardapio[10], tp_pilha *pilhaa, F
             inputinhoTXT(matrix, 25, 75, forpedro, pausa);
 
             inicializa_pilha(pilhaa);
+
+       
         }
     }
 }
