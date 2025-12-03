@@ -998,6 +998,5 @@ int main()
     salvarConsumo(consumoDiario, consumoFile);
     fclose(consumoFile);
 
-
     return 0;
 }
